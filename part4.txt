@@ -1,9 +1,12 @@
-First, we need to do some investigation of the issue.  I'd start with reviewing the queries that are taking a long time or timing out.  Are they well-constructed?  Are they causing full table scans?  Are they utilizing existing indexes and if not, can they be rewritten to do so?  An AWR report or Explain Plan could help with this.
+First, we need to do some investigation of the issue.  I'd start with reviewing the queries that are taking a long time or timing out.  
+Are they well-constructed?  Are they causing full table scans?  Are they utilizing existing indexes and if not, can they be rewritten 
+to do so?  An AWR report or Explain Plan could help with this.
 
 After the investigation, here's the list of possible ways to remedy the situation:
 
 Add indexes  
-If the queries are not able to use an existing index, then adding indexes to match the queries could help avoid full table scans and improve performance.  A potential issue is that if you already have several indexes on the table then each change to the table can cause changes to the index which could negatively impact performance.  But, this could be helped by the next option.
+If the queries are not able to use an existing index, then adding indexes to match the queries could help avoid full table scans and 
+improve performance.  A potential issue is that if you already have several indexes on the table then each change to the table can cause changes to the index which could negatively impact performance.  But, this could be helped by the next option.
 
 Move indexes to a separate tablespace 
 If the indexes are stored on a different tablespace then where the table is stored the I/O wait could be reduced, thus helping performance.  Ideally this tablespace will be on a different drive/mount from the table's tablespace. 
