@@ -1,0 +1,21 @@
+First, we need to do some investigation of the issue.  I'd start with reviewing the queries that are taking a long time or timing out.  Are they well-constructed?  Are they causing full table scans?  Are they utilizing existing indexes and if not, can they be rewritten to do so?  An AWR report or Explain Plan could help with this.
+
+After the investigation, here's the list of possible ways to remedy the situation:
+
+Add indexes  
+If the queries are not able to use an existing index, then adding indexes to match the queries could help avoid full table scans and improve performance.  A potential issue is that if you already have several indexes on the table then each change to the table can cause changes to the index which could negatively impact performance.  But, this could be helped by the next option.
+
+Move indexes to a separate tablespace 
+If the indexes are stored on a different tablespace then where the table is stored the I/O wait could be reduced, thus helping performance.  Ideally this tablespace will be on a different drive/mount from the table's tablespace. 
+
+Add a cross-reference table between BORROWERS and BOOKS
+This would enable queries on just the books that are on loan. It would also remove the need to update the BOOKS table whenever a book is loaned or returned. 
+
+Partition the BOOKS table 
+By looking at the long running queries you could develop a partitioning strategy that would reduce query times.  If queries often search by title, then creating partitions by title would be appropriate.  Or if most of the queries are concerning newer books then partitioning by publication date could be used.  Additionally, by creating the partitions on separate tablespaces you could help reduce I/O issues.
+
+Separate older books into an archive table 
+If books past a certain publication date are rarely requested then a separate table could be made for their storage.  A BOOKS_ARCHIVE table could hold volumes with older publication dates, thus reducing the number of rows in the BOOKS table. This would require altering existing queries to include the BOOKS_ARCHIVE when needed.
+
+Denormalize the BOOKS/AUTHORS table 
+If slow queries are requiring the joining of the BOOKS and AUTHORS tables, the table could be combined into one denormalized table.  This would cause redundant data which considering we're talking about 50 million rows would be a considerable increase in storage requirements.  However, it would eliminate the join cost which could be considerable.
